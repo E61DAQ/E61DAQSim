@@ -1,0 +1,2 @@
+use "ulimit -n 4096" to increase the ile open limit and "ulimit -aS | grep open" to check it
+

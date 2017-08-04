@@ -1,0 +1,7 @@
+# Dummy config file
+
+OutputPath ./
+#TTreeEventCap 61200
+TTreeTriggerCap 1000
+TFileTTreeCap 1
+MRDEnable 1
