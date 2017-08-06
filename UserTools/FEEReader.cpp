@@ -27,8 +27,9 @@ bool FEEReader::Initialise(std::string configfile, DataModel &data){
     data->m_trignum=0;
     FEE_args* args=new FEE_args(m_data->context,i, m_data->m_FEEData,&m_threads_running);
 
-    int rc= pthread_create(&id, NULL, FEEReader::FEESimThread, args);
-    
+    // int rc= pthread_create(&id, NULL, FEEReader::FEESimThread, args);
+    int rc= pthread_create(&id, NULL, FEEReader::FEERemoteThread, args);
+
     if (rc){
       std::cout << "Error:unable to create thread," << rc <<" : "<<i<< std::endl;
       exit(-1);
@@ -180,6 +181,93 @@ void* FEEReader::FEESimThread(void *arg) {
       }
       ///generate data
    
+    }
+
+
+
+  
+ 
+  }
+    pthread_exit(NULL);
+ 
+}
+
+
+void* FEEReader::FEERemoteThread(void *arg) {
+
+  FEE_args* args= static_cast<FEE_args*>(arg);
+  int FEEid=args->FEEid; 
+
+  std::stringstream address;
+  address<<"tcp://localhost:"<<(60000+FEEid);
+  zmq::socket_t FEE(*(args->context), ZMQ_REQ);
+  FEE.connect(address.str().c_str());
+  
+
+  zmq::socket_t Triggersock(*(args->context), ZMQ_SUB);
+  //  Triggersock.connect("inproc://Trigger");
+  Triggersock.connect("tcp://localhost:55555");
+  Triggersock.setsockopt(ZMQ_SUBSCRIBE,"",0);
+
+  zmq::pollitem_t items [] = {
+    { Triggersock, 0, ZMQ_POLLIN, 0 },
+  };
+
+  std::vector<FEEData*>* data=args->data;
+
+  bool* running=args->running;  
+ 
+  data->at(FEEid)->m_trignum=0;
+  
+
+  while(*running){
+
+    zmq::poll(&items[0], 1, 100); 
+
+    // if (items [0].revents & ZMQ_POLLIN) running=false;
+
+    if (items [0].revents & ZMQ_POLLIN){
+      zmq::message_t msg;
+      Triggersock.recv(&msg);
+
+      data->at(FEEid)->m_trignum=*(reinterpret_cast<unsigned long*>(msg.data()));
+
+      FEE.send(msg);
+      
+      zmq::message_t rep;
+      FEE.recv(&rep);
+      
+      int size=0;
+      size=*(reinterpret_cast<int*>(rep.data()));
+
+      zmq::message_t rep2;
+      FEE.recv(&rep2);
+
+      //Data=new uint16_t[message.size()/(sizeof(uint16_t))];
+      //std::memcpy(&Data[0], message.data(), message.size());
+      // delete data->at(FEEid)->Hits;
+      // data->at(FEEid)->Hits=0;
+      //data->at(FEEid)->Hits=new std::vector<char> (rep.data(), rep.size()/ sizeof char );
+      data->at(FEEid)->Hits.clear();
+      char* tmp=(reinterpret_cast<char*>(rep2.data()));
+      data->at(FEEid)->Hits.assign(tmp, tmp+size);
+	
+      if(size>0) std::cout<<"received numhits="<<size<<" hit 0="<<data->at(FEEid)->Hits.at(0)<<std::endl;
+      /*
+      int numhits= (rand() %53);
+      data->at(FEEid)->Hits.clear();
+      
+      for(int i=0;i<numhits;i++){
+	char tmp;
+	tmp=(char)(rand() % 10);
+	data->at(FEEid)->Hits.push_back(tmp);
+	tmp=(char)(rand() % 10);
+	data->at(FEEid)->Hits.push_back(tmp);
+	tmp=(char)(rand() % 10);
+	data->at(FEEid)->Hits.push_back(tmp);
+      }
+      ///generate data
+      */
     }
 
 

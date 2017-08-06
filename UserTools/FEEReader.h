@@ -42,6 +42,7 @@ class FEEReader: public Tool {
  private:
 
   static void *FEESimThread(void *arg);
+  static void *FEERemoteThread(void *arg);
   //  zmq::socket_t* ThreadQuit;
   
   int m_num_FEEs;
