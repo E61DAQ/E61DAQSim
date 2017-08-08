@@ -1,7 +1,7 @@
 #include "DataModel.h"
 
 DataModel::DataModel(){}
-
+/*
 
 TTree* DataModel::GetTTree(std::string name){
 
@@ -25,3 +25,4 @@ void DataModel::DeleteTTree(std::string name){
 
 
 
+*/

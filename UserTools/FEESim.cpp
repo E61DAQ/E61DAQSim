@@ -11,7 +11,7 @@ bool FEESim::Initialise(std::string configfile, DataModel &data){
   m_data= &data;
 
  sock=new zmq::socket_t (*(m_data->context), ZMQ_REP);
- sock->bind("tcp://*:60000");
+ sock->connect("tcp://192.168.111.2:60000");
 
   return true;
 }
