@@ -1,0 +1,7 @@
+#test1 DummyTool configfiles/DummyToolConfig
+#test2 DummyTool configfiles/DummyToolConfig
+#InputVariables InputVariables configfiles/InputVariablesConfig
+#Trigger Trigger configfiles/TriggerConfig
+#FEEReader FEEReader configfiles/FEEReaderConfig
+#RootDataRecorder RootDataRecorder configfiles/RootDataRecorderConfig
+FEESim FEESim configfiles/FEESC3

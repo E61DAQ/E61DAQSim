@@ -1,8 +1,5 @@
 #include "FEESim.h"
 
-void bencleanup (void *data, void *hint) {
-  //  free (data);
-}
 
 FEESim::FEESim():Tool(){}
 
@@ -29,37 +26,50 @@ bool FEESim::Initialise(std::string configfile, DataModel &data){
 
 bool FEESim::Execute(){
 
-  zmq::message_t rec;
-  sock->recv(&rec);
-
-  int *numhits= new int(rand() %53);
-  char data[(*numhits)*3];
-  
-  for(int i=0;i<(*numhits)*3;i++){
-    
-    data[i]=(char)((rand() % 50) + 46);
-    
-  }
-
-  std::cout<<"sent numhits="<<(*numhits)<<" hit[0]="<<data[0]<<std::endl;
-  
-  //  zmq::message_t ms2(&data[0], sizeof data, NULL);
-  
-  
-    zmq::message_t ms1(numhits,sizeof(int), NULL);
-  //zmq::message_t ms1(sizeof(unsigned int));
-
-  //memcpy(ms1.data(), &numhits, sizeof(unsigned int));
-
-  std::cout<<"sent numhits="<<(*numhits)<<" hit[0]="<<data[0]<<std::endl;
-  
-    sock->send(ms1);//,ZMQ_SNDMORE);
-    //    sock->send(ms2);
-
  
+  zmq::pollitem_t items [] = {
+    { *sock, 0, ZMQ_POLLIN, 0 },
+  };
+  
+  zmq::poll(&items[0], 1, 100);
+
+  if (items [0].revents & ZMQ_POLLIN){
+  
+    //  std::cout<<"waiting to receive"<<std::endl;
+    zmq::message_t rec;
+    sock->recv(&rec);
+    // std::cout<<"received"<<std::endl;
     
-    std::cout<<"sent numhits="<<(*numhits)<<" hit[0]="<<data[0]<<std::endl;
-  return true;
+    int *numhits= new int(rand() %53);
+    char *data=new char[(*numhits)*3];
+    
+    for(int i=0;i<(*numhits)*3;i++){
+      
+      data[i]=(char)((rand() % 50) + 46);
+      
+    }
+    
+  //std::cout<<"sent numhits="<<(*numhits)<<" hit[0]="<<data[0]<<std::endl;
+    
+    zmq::message_t ms2(&data[0], sizeof(char)*(*numhits)*3, NULL);
+    
+    
+    zmq::message_t ms1(numhits,sizeof(int), NULL);
+    //zmq::message_t ms1(sizeof(unsigned int));
+    
+    //memcpy(ms1.data(), &numhits, sizeof(unsigned int));
+    
+    //std::cout<<"sent numhits="<<(*numhits)<<" hit[0]="<<data[0]<<std::endl;
+    
+    sock->send(ms1,ZMQ_SNDMORE);
+    sock->send(ms2);
+    
+    
+    
+    //std::cout<<"sent numhits="<<(*numhits)<<" hit[0]="<<data[0]<<std::endl;
+
+    }
+    return true;
 }
 
 
