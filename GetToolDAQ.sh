@@ -15,7 +15,7 @@ tar zxf boost_1_60_0.tar.gz
 cd zeromq-4.0.7
 
 ./configure --prefix=`pwd`
-make
+make -j 4
 make install
 
 export LD_LIBRARY_PATH=`pwd`/lib:$LD_LIBRARY_PATH
@@ -32,7 +32,7 @@ export LD_LIBRARY_PATH=`pwd`/install/lib:$LD_LIBRARY_PATH
 cd ../ToolDAQFramework
 
 make clean
-make
+make -j 4
 
 export LD_LIBRARY_PATH=`pwd`/lib:$LD_LIBRARY_PATH
 
@@ -51,6 +51,6 @@ export LD_LIBRARY_PATH=`pwd`/lib:$LD_LIBRARY_PATH
 cd ../../
 
 make clean
-make
+make -j 4
 
 export LD_LIBRARY_PATH=`pwd`/lib:$LD_LIBRARY_PATH

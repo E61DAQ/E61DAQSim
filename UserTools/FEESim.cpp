@@ -1,5 +1,9 @@
 #include "FEESim.h"
 
+void bencleanup (void *data, void *hint) {
+  //  free (data);
+}
+
 FEESim::FEESim():Tool(){}
 
 
@@ -28,30 +32,33 @@ bool FEESim::Execute(){
   zmq::message_t rec;
   sock->recv(&rec);
 
-  int numhits= (rand() %53);
-  char data[numhits*3];
+  int *numhits= new int(rand() %53);
+  char data[(*numhits)*3];
   
-  for(int i=0;i<numhits*3;i++){
+  for(int i=0;i<(*numhits)*3;i++){
     
     data[i]=(char)((rand() % 50) + 46);
     
   }
 
-  std::cout<<"sent numhits="<<numhits<<" hit[0]="<<data[0]<<std::endl;
+  std::cout<<"sent numhits="<<(*numhits)<<" hit[0]="<<data[0]<<std::endl;
   
-  zmq::message_t ms2(&data[0], sizeof data, NULL);
+  //  zmq::message_t ms2(&data[0], sizeof data, NULL);
   
   
-  zmq::message_t ms1(&numhits,sizeof numhits, NULL);
+    zmq::message_t ms1(numhits,sizeof(int), NULL);
+  //zmq::message_t ms1(sizeof(unsigned int));
 
-    std::cout<<"sent numhits="<<numhits<<" hit[0]="<<data[0]<<std::endl;
+  //memcpy(ms1.data(), &numhits, sizeof(unsigned int));
+
+  std::cout<<"sent numhits="<<(*numhits)<<" hit[0]="<<data[0]<<std::endl;
   
     sock->send(ms1);//,ZMQ_SNDMORE);
-    sock->send(ms2);
+    //    sock->send(ms2);
 
  
     
-    std::cout<<"sent numhits="<<numhits<<" hit[0]="<<data[0]<<std::endl;
+    std::cout<<"sent numhits="<<(*numhits)<<" hit[0]="<<data[0]<<std::endl;
   return true;
 }
 
