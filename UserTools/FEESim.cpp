@@ -10,8 +10,14 @@ bool FEESim::Initialise(std::string configfile, DataModel &data){
 
   m_data= &data;
 
- sock=new zmq::socket_t (*(m_data->context), ZMQ_REP);
- sock->connect("tcp://192.168.111.2:60000");
+  int port=0;
+  m_variables.Get("Port",port);
+
+  std::stringstream tmp;
+  tmp<<"tcp://192.168.111.2:"<<port;
+  
+  sock=new zmq::socket_t (*(m_data->context), ZMQ_DEALER);
+  sock->connect(tmp.str().c_str());
 
   return true;
 }
@@ -30,16 +36,22 @@ bool FEESim::Execute(){
     data[i]=(char)((rand() % 50) + 46);
     
   }
+
+  std::cout<<"sent numhits="<<numhits<<" hit[0]="<<data[0]<<std::endl;
   
   zmq::message_t ms2(&data[0], sizeof data, NULL);
   
   
   zmq::message_t ms1(&numhits,sizeof numhits, NULL);
 
-  sock->send(ms1,ZMQ_SNDMORE);
-  sock->send(ms2);
+    std::cout<<"sent numhits="<<numhits<<" hit[0]="<<data[0]<<std::endl;
+  
+    sock->send(ms1);//,ZMQ_SNDMORE);
+    sock->send(ms2);
 
-  std::cout<<"sent numhits="<<numhits<<" hit[0]="<<data[0]<<std::endl;
+ 
+    
+    std::cout<<"sent numhits="<<numhits<<" hit[0]="<<data[0]<<std::endl;
   return true;
 }
 
