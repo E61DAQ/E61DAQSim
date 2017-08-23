@@ -41,17 +41,17 @@ bool FEESim::Execute(){
     // std::cout<<"received"<<std::endl;
     
     int *numhits= new int(rand() %53);
-    char *data=new char[(*numhits)*3];
+    unsigned int *data=new unsigned int[(*numhits)*6];
     
-    for(int i=0;i<(*numhits)*3;i++){
+    for(int i=0;i<(*numhits)*6;i++){
       
-      data[i]=(char)((rand() % 50) + 46);
+      data[i]=(rand() % 9999) + 46;
       
     }
     
   //std::cout<<"sent numhits="<<(*numhits)<<" hit[0]="<<data[0]<<std::endl;
     
-    zmq::message_t ms2(&data[0], sizeof(char)*(*numhits)*3, NULL);
+    zmq::message_t ms2(&data[0], sizeof(unsigned int)*(*numhits)*6, NULL);
     
     
     zmq::message_t ms1(numhits,sizeof(int), NULL);
