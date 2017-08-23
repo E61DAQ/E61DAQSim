@@ -38,7 +38,7 @@ bool Trigger::Execute(){
     boost::posix_time::time_duration duration(current_time - m_last_trigger);
     
     if(duration.total_microseconds()>m_trigger_period){
-      //std::cout<<"time "<<duration.total_microseconds()<<" "<<m_trigger_period<<std::endl;
+      std::cout<<"time "<<duration.total_microseconds()<<" "<<m_trigger_period<<std::endl;
       
       m_data->m_triggered=true;
       m_data->m_trigger_num++;

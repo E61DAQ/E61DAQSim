@@ -10,8 +10,8 @@ bool FEESim::Initialise(std::string configfile, DataModel &data){
 
   m_data= &data;
 
- sock=new zmq::socket_t (*(m_data->context), ZMQ_REP);
- sock->bind("tcp://*:60000");
+ sock=new zmq::socket_t (*(m_data->context), ZMQ_DEALER);
+ sock->connect("tcp://localhost:60000");
 
   return true;
 }
@@ -22,24 +22,24 @@ bool FEESim::Execute(){
   zmq::message_t rec;
   sock->recv(&rec);
 
-  int numhits= (rand() %53);
-  char data[numhits*3];
+  int *numhits= new int(rand() %53);
+  char data[(*numhits)*3];
   
-  for(int i=0;i<numhits*3;i++){
+  for(int i=0;i<(*numhits)*3;i++){
     
     data[i]=(char)((rand() % 50) + 46);
     
   }
   
-  zmq::message_t ms2(&data[0], sizeof data, NULL);
+  //zmq::message_t ms2(&data[0], sizeof data, NULL);
   
   
-  zmq::message_t ms1(&numhits,sizeof numhits, NULL);
+  zmq::message_t ms1(numhits,sizeof(int), NULL);
 
-  sock->send(ms1,ZMQ_SNDMORE);
-  sock->send(ms2);
+  sock->send(ms1);//,ZMQ_SNDMORE);
+  // sock->send(ms2);
 
-  std::cout<<"sent numhits="<<numhits<<" hit[0]="<<data[0]<<std::endl;
+  std::cout<<"sent numhits="<<(*numhits)<<" hit[0]="<<data[0]<<std::endl;
   return true;
 }
 

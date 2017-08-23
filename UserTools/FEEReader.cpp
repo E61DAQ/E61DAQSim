@@ -199,9 +199,9 @@ void* FEEReader::FEERemoteThread(void *arg) {
   int FEEid=args->FEEid; 
 
   std::stringstream address;
-  address<<"tcp://localhost:"<<(60000+FEEid);
-  zmq::socket_t FEE(*(args->context), ZMQ_REQ);
-  FEE.connect(address.str().c_str());
+  address<<"tcp://*:"<<(60000+FEEid);
+  zmq::socket_t FEE(*(args->context), ZMQ_DEALER);
+  FEE.bind(address.str().c_str());
   
 
   zmq::socket_t Triggersock(*(args->context), ZMQ_SUB);
@@ -227,32 +227,67 @@ void* FEEReader::FEERemoteThread(void *arg) {
     // if (items [0].revents & ZMQ_POLLIN) running=false;
 
     if (items [0].revents & ZMQ_POLLIN){
+
+     
       zmq::message_t msg;
       Triggersock.recv(&msg);
 
       data->at(FEEid)->m_trignum=*(reinterpret_cast<unsigned long*>(msg.data()));
 
-      FEE.send(msg);
+      //     std::cout<<"sending trig"<<std::endl;
+      zmq::message_t msg2(1);
+      FEE.send(msg2);
+      //std::cout<<"sent"<<std::endl;
+
       
       zmq::message_t rep;
       FEE.recv(&rep);
       
       int size=0;
+      //      std::cout<<rep.data()<<" : "<<*((int*)(rep.data()))<<std::endl;
       size=*(reinterpret_cast<int*>(rep.data()));
 
+      //printf("received numhits=%i \n",size);
+
+      if (size>60) exit(0);     
       zmq::message_t rep2;
       FEE.recv(&rep2);
-
+      
       //Data=new uint16_t[message.size()/(sizeof(uint16_t))];
       //std::memcpy(&Data[0], message.data(), message.size());
       // delete data->at(FEEid)->Hits;
       // data->at(FEEid)->Hits=0;
       //data->at(FEEid)->Hits=new std::vector<char> (rep.data(), rep.size()/ sizeof char );
+      
+      //  printf("received numhits=%i \n",size);
+      
+      
       data->at(FEEid)->Hits.clear();
       char* tmp=(reinterpret_cast<char*>(rep2.data()));
-      data->at(FEEid)->Hits.assign(tmp, tmp+size);
+      // if(size<60){
+	data->at(FEEid)->Hits.assign(tmp, tmp+size);
 	
-      if(size>0) std::cout<<"received numhits="<<size<<" hit 0="<<data->at(FEEid)->Hits.at(0)<<std::endl;
+	// }
+	//else size=0;
+	//      if(size>0) printf("received numhits=%i  hit 0=%c\n",size,data->at(FEEid)->Hits.at(0));
+      
+      /*
+      zmq::pollitem_t test [] = {
+	{ FEE, 0, ZMQ_POLLIN, 0 },
+      };
+
+      for(int j=0;j<10;j++){
+      zmq::poll(&test[0], 1, 10);
+
+      if (test[0].revents & ZMQ_POLLIN){
+
+	zmq::message_t rep;
+	FEE.recv(&rep);
+      }
+      }
+      */
+
+      //if(size>0) std::cout<<"received numhits="<<size<<" hit 0="<<data->at(FEEid)->Hits.at(0)<<std::endl;
       /*
       int numhits= (rand() %53);
       data->at(FEEid)->Hits.clear();

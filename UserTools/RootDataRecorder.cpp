@@ -61,7 +61,7 @@ bool RootDataRecorder::Initialise(std::string configfile, DataModel &data){
   br->SetCompressionLevel(1);  
   br=tree->Branch("NumHits",&NumHits,"NumHits/I");
   br->SetCompressionLevel(1);  
-  br=tree->Branch("Hits",hitsconv,"Hits[NumHits]/b");
+  br=tree->Branch("Hits",hitsconv,"Hits[NumHits]/B");
   br->SetCompressionLevel(1);  
   m_data->AddTTree("PMTData",tree);
 
@@ -126,7 +126,7 @@ bool RootDataRecorder::Execute(){
     br->SetCompressionLevel(1);  
     br=tree->Branch("NumHits",&NumHits,"NumHits/I");
     br->SetCompressionLevel(1);  
-    br=tree->Branch("Hits",hitsconv,"Hits[NumHits]/b");
+    br=tree->Branch("Hits",hitsconv,"Hits[NumHits]/B");
     br->SetCompressionLevel(1);  
 
   }
@@ -143,7 +143,9 @@ bool RootDataRecorder::Execute(){
     //NumHits=Hits.size()*3;
     NumHits=(m_data->m_FEEData->at(i)->Hits.size());
     hitsconv=&m_data->m_FEEData->at(i)->Hits[0];
-      // for(int j=0;j<m_data->m_FEEData->at(i)->Hits.size();j++){
+    tree->SetBranchAddress("Hits",hitsconv);
+
+    // for(int j=0;j<m_data->m_FEEData->at(i)->Hits.size();j++){
       //    strcat(hitsconv,m_data->m_FEEData->at(i)->Hits.at(j));
       // }
     //  memcpy(m_card.triggerCounts, m_data->carddata.at(i)->triggerCounts, m_card.triggerNumber*sizeof(uint64_t));
